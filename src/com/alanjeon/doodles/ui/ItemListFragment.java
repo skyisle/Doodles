@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -12,6 +13,8 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -21,7 +24,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.alanjeon.doodles.R;
 import com.alanjeon.doodles.util.DoodleLoader;
-import com.androidquery.AQuery;
+import com.alanjeon.doodles.util.ImageFetcher;
+import com.alanjeon.doodles.util.UIUtils;
 
 public class ItemListFragment extends ContractListFragment<ItemListFragment.Contract> implements
         LoaderManager.LoaderCallbacks<List<DoodleInfo>>, OnNavigationListener {
@@ -34,12 +38,14 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
     // Adapters
     private ArrayAdapter<String> mMonthAdapter;
     private DoodleListAdapter mAdapter;
+    ImageFetcher mImageFetcher;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mAdapter = new DoodleListAdapter(getActivity());
+        mImageFetcher = UIUtils.getImageFetcher(getSherlockActivity());
+        mAdapter = new DoodleListAdapter(getSherlockActivity(), mImageFetcher);
         setListAdapter(mAdapter);
 
         ActionBar actionBar = getSherlockActivity().getSupportActionBar();
@@ -51,6 +57,25 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
             strings.add(c.get(Calendar.YEAR) + "/" + (c.get(Calendar.MONTH) + 1));
             c.add(Calendar.MONTH, -1);
         }
+
+        getListView().setOnScrollListener(new OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (SCROLL_STATE_IDLE != scrollState) {
+                    mImageFetcher.setPauseDiskCache(true);
+                } else {
+                    mImageFetcher.setPauseDiskCache(false);
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                    int totalItemCount) {
+                // TODO Auto-generated method stub
+
+            }
+        });
 
         mMonthAdapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
                 R.layout.sherlock_spinner_item, strings);
@@ -108,19 +133,26 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
 
     public static class DoodleListAdapter extends ArrayAdapter<DoodleInfo> {
         private final LayoutInflater mInflater;
-        private AQuery aquery;
+        private ImageFetcher mFetcher;
 
-        public DoodleListAdapter(Context context) {
+        public DoodleListAdapter(Context context, ImageFetcher imageFetcher) {
             super(context, android.R.layout.simple_list_item_2);
-            aquery = new AQuery(context);
+            mFetcher = imageFetcher;
 
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
+        @TargetApi(11)
         public void setData(List<DoodleInfo> data) {
             clear();
             if (data != null) {
-                addAll(data);
+                if (UIUtils.isHoneycomb()) {
+                    addAll(data);
+                } else {
+                    for (DoodleInfo info : data) {
+                        add(info);
+                    }
+                }
             }
         }
 
@@ -150,10 +182,9 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
             }
 
             DoodleInfo item = getItem(position);
+            
+            mFetcher.loadThumbnailImage(item.url, holder.logo);
 
-            AQuery aq = aquery.recycle(holder.logo);
-            aq.id(holder.logo).image(item.url, true, true, 0, 0, null,
-                    AQuery.FADE_IN, AQuery.RATIO_PRESERVE);
             holder.title.setText(item.title);
             holder.run_date.setText(item.run_date);
 

@@ -4,6 +4,7 @@ package com.alanjeon.doodles.util;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.support.v4.app.FragmentActivity;
 
 public class UIUtils {
     public static boolean isHoneycomb() {
@@ -22,5 +23,12 @@ public class UIUtils {
 
     public static boolean isHoneycombTablet(Context context) {
         return isHoneycomb() && isTablet(context);
+    }
+
+    public static ImageFetcher getImageFetcher(FragmentActivity fragmentActivity) {
+        ImageFetcher imageFetcher = new ImageFetcher(fragmentActivity);
+        imageFetcher.setImageCache(ImageCache.findOrCreateCache(fragmentActivity,
+                "imageFetcher"));
+        return imageFetcher;
     }
 }
