@@ -83,6 +83,9 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(mMonthAdapter, this);
 
+        // Start out with a progress indicator.
+        setListShown(false);
+
         // Prepare the loader. Either re-connect with an existing one,
         // or start a new one.
         Bundle bundle = new Bundle();
@@ -182,7 +185,7 @@ public class ItemListFragment extends ContractListFragment<ItemListFragment.Cont
             }
 
             DoodleInfo item = getItem(position);
-            
+
             mFetcher.loadThumbnailImage(item.url, holder.logo);
 
             holder.title.setText(item.title);

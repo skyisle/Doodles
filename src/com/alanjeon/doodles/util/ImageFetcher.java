@@ -1,14 +1,6 @@
 
 package com.alanjeon.doodles.util;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
-import android.support.v4.app.FragmentActivity;
-import android.widget.ImageView;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,6 +10,12 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.widget.ImageView;
 
 public class ImageFetcher extends ImageWorker {
     private static final String TAG = LogUtils.makeLogTag(ImageFetcher.class);
@@ -164,16 +162,16 @@ public class ImageFetcher extends ImageWorker {
         Bitmap bitmap = null;
         if (type == 1) {
             File file = downloadBitmapToFile(mContext, key,
-                    this.mFetcherParams.mHttpCacheDir);
+                    mFetcherParams.mHttpCacheDir);
             if (file == null)
                 return null;
 
             bitmap = decodeSampledBitmapFromFile(file.toString(),
-                    this.mFetcherParams.mImageWidth, mFetcherParams.mImageHeight);
+                    mFetcherParams.mImageWidth, mFetcherParams.mImageHeight);
             file.delete();
         } else if (type == 0) {
             byte[] bytes = downloadBitmapToMemory(mContext, key,
-                    this.mFetcherParams.mMaxThumbnailBytes);
+                    mFetcherParams.mMaxThumbnailBytes);
             if (bytes != null) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             }
@@ -205,12 +203,12 @@ public class ImageFetcher extends ImageWorker {
         public int mType;
 
         public ImageData(String key, int type) {
-            this.mKey = key;
-            this.mType = type;
+            mKey = key;
+            mType = type;
         }
 
         public String toString() {
-            return this.mKey;
+            return mKey;
         }
     }
 

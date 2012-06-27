@@ -79,7 +79,7 @@ public class DoodleLoader extends AsyncTaskLoader<List<DoodleInfo>> {
                 onReleaseResources(doodles);
             }
         }
-        List<DoodleInfo> oldApps = doodles;
+        List<DoodleInfo> oldDoodles = doodles;
         mDoodles = doodles;
 
         if (isStarted()) {
@@ -91,8 +91,8 @@ public class DoodleLoader extends AsyncTaskLoader<List<DoodleInfo>> {
         // At this point we can release the resources associated with
         // 'oldApps' if needed; now that the new result is delivered we
         // know that it is no longer in use.
-        if (oldApps != null) {
-            onReleaseResources(oldApps);
+        if (oldDoodles != null) {
+            onReleaseResources(oldDoodles);
         }
     }
 
